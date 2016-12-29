@@ -1,0 +1,19 @@
+questions.txt
+
+Computer Science 50
+Problem Set 3
+
+1.  Besides 4 × 4 (which are Game of Fifteen’s dimensions), what other dimensions does the framework allow?
+    The min and max dimensions, defined by DIM_MIN & DIM_MAX are 3 and 9 respectively. This means the board can be 3*3 to a maximum of 9 * 9.
+
+2.  With what sort of data structure is the game’s board represented?
+    a 2 dimentional array.
+    
+3.  What function is called to greet the player at game’s start?
+    the greet() function.
+    
+4.  What functions do you apparently need to implement?
+    init()
+    draw()
+    move()
+    won()

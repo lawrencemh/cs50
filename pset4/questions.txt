@@ -1,0 +1,38 @@
+0.  Gif only supports 256 colours in the whole image due to its indexing algorithms used.
+    PNG also only supports 256 colours.
+    BMP aren't compressed and can support upto 16 million colours in one image.
+    JPEG are compressed but like BMP can support upto 16 million colours.
+1.  GIF supports animation.
+2.  Lossless compression allows for compression where none of the original data is lost (e.g. BMP & GIF).
+    Lossy compression permanently looses some information (e.g. JPEGs aim to remove data from the image the human eye won't notice i.e. unecessary detail).
+3.  JPEG uses lossy compression techniques.
+4.  Firstly, the system changes the filename's first character to signal to the operating system the file has been 'deleted' and the directory entry can be recycled.
+    Secondly, the file's FAT clusters are moved to the list of free clusters in the hardrive's meta data. The actual file's data still remains on the drive
+    until the sectors are eventually overwritten by newer files.
+5.  Write random or NULL characters to every address on the hard drive. On modern hard drives this should be more than sufficient to prevent
+    the recovery of previous data, however on much older drives specalistic magnetic readers could be used to work out what each address used
+    to hold.
+6.  stdint.h is a header file containing functions and typedefs allowing you to use exact width interger types.
+7.  It makes sure you are going to use that data in a consistent way (e.g. conforming to a standard). This means that a program can read certain bytes of
+    a file to get the header information required and expected at certain bytes (e.g. bmp image pixel width).
+8.  A byte is 8 bits and obviously 1 byte. 
+    A DWORD is 4 bytes / 32 bits.
+    A LONG is also 4 bytes / 32 bits.
+    Finally, a WORD is 2 bytes / 16 bits.
+9.  The first two bytes (WORD) of a BMP file should equal 0x4D42 (in ASCII BM) which is the unique identifier to identify the file is a bmp. Any other value
+    could suggest the file is a different format or a non-standard BMP.
+10. bfSize lists the number of btes in the file (e.g. 246 for smily.bmp)
+    biSize states the total bytes in the info header which is 40 for a bitmap.
+11. If the biHeight is positive then the bitmap is a bottom-up device independent bitmap with its origin starting in the lower left corner.
+    Alternatively, if it is negative then the bitmap is a top-down DIB with its origin being the upper left corner.
+12. in the BITMAPINFOHEADER the biBitCount value states the bits used in each pixel of the image. this being 24bits for
+    smiley.bmp
+13. fopen could return null if the user running the program doesn't have sufficient privileges to create that file in the directory.
+14. this parameter specifies how many elements you wish to read. As we're using a struct for RGB, we only want to read 
+    1 struct/element at once as we loop through.
+15. the padding would be 3 for a 3 * 3 pixel image. This is because we need a multiple of 4, thus 3 * 3 is 9, the next
+    multiple of 4 would be 12. thus 12 - 9 = 3.
+16. fseek skips over a certain number of bytes whilst reading a file (in this case padding after each row)
+17. SEEK_CUR is an int constant which when used as a parameter to fseek specifis the offset provided relative to the current
+    file position.
+18. Rick Astley done it.
