@@ -1,0 +1,15 @@
+0.  A lung disease caused by inhaling fine sand or ash dust.
+1.  getrusage returns a pointer to a struct which lists statistical information such as execution time, memory usage etc.
+2.  getrusage returns a strut containing 16 different variables.
+3.  The purpose of getrusage is to calculate execution time and other variables, if you pass without reference, more time will ecalapse with the duplication of the variables for the new scope which
+    will skew the results of getruseage. by passing pointers it limits the additional processing of getruseage making the result more accurate.
+4.  fopen(text, "r") opens the file passed with read-only access. The for loop initalises a int character C which holds the ASCII character codes.
+    The fgetc function uses the fp filepointer variable to iterate to the next character in the file. The for loop's condition is to continue whilst the character doesn't
+    equal EOF i.e. end of file.
+5.  fgetc returns each character in the file including the whitespaces which we will use to identify the end of a word. fscanf will ignore blank spaces which means we 
+    won't be able to identify the end of each word.
+6.  Using constants ensures that during execution of the program the values of these variables cannot be changed. This ensures the dictionary cannot be changed during execution.
+7.  TODO
+8.  TODO
+9.  TODO
+10. TODO
