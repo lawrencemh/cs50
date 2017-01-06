@@ -3,7 +3,7 @@
  *
  * Computer Science 50
  * Problem Set 5
- *
+ * 
  * Implements a dictionary's functionality.
  */
 
@@ -57,6 +57,9 @@ bool check(const char* word)
 
 /**
  * Loads dictionary into memory.  Returns true if successful else false.
+ * 
+ * @param Char* dictionary
+ * @return Bool
  */
 bool load(const char* dictionary)
 {
@@ -116,6 +119,8 @@ bool load(const char* dictionary)
 
 /**
  * Returns number of words in dictionary if loaded else 0 if not yet loaded.
+ * 
+ * @return Int
  */
 unsigned int size(void)
 {
@@ -154,6 +159,8 @@ void dict_destroy(struct Node *n)
 
 /**
  * Unloads dictionary from memory.  Returns true if successful else false.
+ * 
+ * @return Bool
  */
 bool unload(void)
 {

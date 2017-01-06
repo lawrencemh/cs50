@@ -9,7 +9,15 @@
 5.  fgetc returns each character in the file including the whitespaces which we will use to identify the end of a word. fscanf will ignore blank spaces which means we 
     won't be able to identify the end of each word.
 6.  Using constants ensures that during execution of the program the values of these variables cannot be changed. This ensures the dictionary cannot be changed during execution.
-7.  TODO
-8.  TODO
-9.  TODO
-10. TODO
+7.  I decided to use a trie for my dictionary data structure. I defined a struct Node which holds one boolean called is_word and an array of 27 children *Nodes which simply link to another
+    node's memory address. This allows a virtually unlimited tree of Nodes. Each character is transformed to its index (independent of upper/lowercase) with the apostrophe being index 27
+    (as there are only 26 characters in the English alphabet!). The root node accounts for the first letter in a word, then each subsequent node accounts for the second, third letter etc.
+    The program searches down the nodes for each letter in a word and finds the child node for that letter, if the child node for 1(a) for example is NULL, this means there are no further words
+    that have the letter a after n (n bring the number of the letter of the word), thus we can conclude the word is spelled incorrectly. However if there is a child, we still must check if the node is_word = 
+    true if the character is the last letter in the word, as there still may exist further words down the children (e.g. cook cooks). Thus just because the child exists doesn't necessarily mean that the word is valid
+    (e.g. RU. U is a valid child, but this is not a word, U is a child because further children such as R exist to make RUN).
+8.  My code on first run actually ran quite fast (within .12 of a second). However, I had to make some optimisations to fix some memory errors which actually slightly increased the runtime.
+9.  To reduce some of the memory errors, I had to initialise the default values of each node and children to false and null respectively, however this was at the expense of slightly longer runtime.
+    The program still on average completes within 0.2 of a second.
+10. Although I thought using a trie data structure for my dictionary would be the fastest, the staff's solution is still faster than mine and I can't see any immediate improvements I can make using the 
+    current trie model. Prehaps I could try utilising a hash linked list to see if this performs better in the future.

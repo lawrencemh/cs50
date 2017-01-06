@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+import sys
+import os
+import nltk
+
+from analyzer import Analyzer
+from helpers import chart, get_user_timeline
+from nltk.tokenize import TweetTokenizer
+from termcolor import colored
+
+def main():
+    # ensure proper usage
+    if len(sys.argv) != 2:
+        sys.exit("Usage: ./smile @twitterHandle")
+    else:
+        tHandle = sys.argv[1][1:]
+
+    # get tweets using api
+    tweets = get_user_timeline(tHandle, 50)
+    
+    # absolute paths to lists
+    positives = os.path.join(sys.path[0], "positive-words.txt")
+    negatives = os.path.join(sys.path[0], "negative-words.txt")
+    
+    # Initalise analyzer
+    analyzer = Analyzer(positives, negatives)
+    
+    # initalise tweet tokenizer
+    tknzr = TweetTokenizer()
+        
+    # analyze the tweets
+    for tweet in tweets:
+        score = 0
+        t = tknzr.tokenize(tweet)
+        for c in t:
+            score += analyzer.analyze(c)
+            
+        # set colour for output based on score
+        if score > 0.0:
+            colour = "green"
+        elif score < 0.0:
+            colour = "red"
+        else:
+            colour = "yellow"
+        
+        # print the tweet
+        print (colored(" {} ".format(score), colour), end="")
+        print (colored(tweet, colour))
+
+if __name__ == "__main__":
+    main()
