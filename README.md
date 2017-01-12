@@ -33,9 +33,8 @@ In Pset6 I had the opportunity to move away from C (which is a low level languag
 - [greedy.py](/pset6/greedy.py)
 - [mario.py](/pset6/mario.py)
 - [vigenere.py](/pset6/vigenere.py)
-- [Sentiments](/sentiments)
 - [smile](/sentiments/smile) - uses analyzer.py to categorise the word passed as an argument (e.g. ./smile good).
-- [tweet](/sentiments/tweet) - uses analyzer.py and twitter's API to categorise a user's last 50 tweets (usage ./tweets @twitterHandler).
+- [tweets](/sentiments/tweets) - uses analyzer.py and twitter's API to categorise a user's last 50 tweets (usage ./tweets @twitterHandler).
 - [Flask App](/sentiments/application.py) Web application for Sentiments.
 
 Sentiments is a very basic MVC Flask application that allows a user to analyse a twitter user's tweets from the homepage. A page containing a pie chart is then shown categorising the user's tweets as good, bad or neutral.
@@ -43,7 +42,12 @@ The sentiments application can be run when flask is installed using "flask run".
 - export API_KEY=value
 - export API_SECRET=value
 
-### Problem Set 7 (2017)
+### TODO: Problem Set 7 (2017)
 In pset7 I created a MVC web application allowing users to buy and sell stocks with a virtual portfolio. users can register for a personal account and have $10,000 pretend funds available by default. This application largely makes use of Yahoo's finance API.
+TODO: Implement remaining controllers and views
 
- 
+### TODO: Problem Set 8 (2017)
+TODO: Implement Mashup
+
+### TODO: Final Project (2017)
+TODO
