@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+    <table class="table table-stripped">
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Shares</th>
+            <th>Price</th>
+            <th>Value</th>
+        </tr>
+        {% for share in shares %}
+        <tr>
+            <td>{{ share.symbol }}</td>
+            <td>{{ share.name }}</td>
+            <td>{{ share.qty or 0 }}</td>
+            <td>{{ share.price }}</td>
+            <td>{{ share.value }}</td>
+        </tr>
+        {% endfor %}
+        
+    </table>
+{% endblock %}

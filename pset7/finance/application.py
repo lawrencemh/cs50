@@ -5,6 +5,7 @@ from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
 
 from helpers import *
+import json
 
 # configure application
 app = Flask(__name__)
@@ -36,9 +37,44 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("TODO")
+    # if user is not logged in redirect to login
+    user_id = session["user_id"]
+    if not session["user_id"]:
+        return redirect(url_for("login"))
+        
+    # get user's portfolio from database
+    portfolio = db.execute("SELECT user_id, symbl as symbol, sum(quantity) as qty FROM user_history WHERE type = :type AND user_id = :uid GROUP BY user_id, symbol", uid=user_id, type=1)
+    
+    # check sql executed properly
+    if not portfolio:
+        return apology("Error loading your portfolio!")
+        
+    # Iterate through each share in portfolio
+    for share in portfolio:
+        share_dt = lookup(share["symbol"])
+        
+        # check share data was successfully loaded from yahoo api
+        if not share_dt:
+            return apology("Couldn't get info for {}".format(share.symbol))
+        
+        # set name
+        share["name"] = share_dt["name"]
+        
+        # calculate value only if qty is present
+        qty = share["qty"]
+        if qty:
+            share["value"] = usd(qty * share_dt["price"])
+        
+        # get price
+        share["price"] = usd(share_dt["price"])
+        
+    # create cash object to summarise user's cash and append to end of portfolio
+    value = db.execute("SELECT cash FROM users WHERE id = :uid", uid=user_id)[0]["cash"]
+    cash = {"symbol" : "CASH", "name" : " ", "qty" : " ", "price" : " ", "value" : usd(value)}
+    portfolio.append(cash)
 
-
+    # return html list of portfolio summary
+    return render_template('index.html', shares=portfolio)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -76,18 +112,18 @@ def buy():
             return apology("Sorry you don't have sufficient funds for this transaction!")
         
         # insert purchase into user_history
-        r = db.execute("INSERT INTO user_history ('user_id', 'symbl', 'price', 'type') VALUES (:user_id, :symbol, :price, :type)", user_id=session["user_id"], symbol=ticker, price=price, type=1)
+        r = db.execute("INSERT INTO user_history ('user_id', 'symbl', 'price', 'type', 'quantity') VALUES (:user_id, :symbol, :price, :type, :quantity)", user_id=session["user_id"], symbol=ticker, price=price, type=1, quantity=quantitys)
         if not r:
             return apology("Sorry - somthing went wrong with this transaction!")
             
         # deduct cash_req from user's cash on table user
         r = db.execute("UPDATE users SET cash = :new_cash WHERE id = :user_id", new_cash=(cash - cash_req), user_id=session["user_id"])
         
-        return "you have {} ".format(cash)
+        # redirect user to home page
+        return redirect(url_for("index"))
         
-        return "bought!"
     elif request.method == "GET":
-        return render_template('buy.html') 
+        return render_template('buy.html')
 
 
 
