@@ -44,3 +44,9 @@ main td
     /* left-align tables' cells */
     text-align: left;
 }
+
+/* form select fix */
+select.form-control
+{
+    min-width: 196px;
+}

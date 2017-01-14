@@ -43,7 +43,7 @@ def index():
         return redirect(url_for("login"))
         
     # get user's portfolio from database
-    portfolio = db.execute("SELECT user_id, symbl as symbol, sum(quantity) as qty FROM user_history WHERE type = :type AND user_id = :uid GROUP BY user_id, symbol", uid=user_id, type=1)
+    portfolio = db.execute("SELECT user_id, symbl as symbol, sum(quantity) as qty FROM user_history WHERE type = :type AND user_id = :uid AND is_sold = 0 GROUP BY user_id, symbol", uid=user_id, type=1)
     
     # check sql executed properly
     if not portfolio:
@@ -111,10 +111,11 @@ def buy():
         if cash < cash_req:
             return apology("Sorry you don't have sufficient funds for this transaction!")
         
-        # insert purchase into user_history
-        r = db.execute("INSERT INTO user_history ('user_id', 'symbl', 'price', 'type', 'quantity') VALUES (:user_id, :symbol, :price, :type, :quantity)", user_id=session["user_id"], symbol=ticker, price=price, type=1, quantity=quantitys)
-        if not r:
-            return apology("Sorry - somthing went wrong with this transaction!")
+        # iterate through quantity and insert shares into user_history
+        for i in range(quantity):
+            r = db.execute("INSERT INTO user_history ('user_id', 'symbl', 'price', 'type', 'quantity') VALUES (:user_id, :symbol, :price, :type, 1)", user_id=session["user_id"], symbol=ticker, price=price, type=1)
+            if not r:
+                return apology("Sorry - somthing went wrong with this transaction!")
             
         # deduct cash_req from user's cash on table user
         r = db.execute("UPDATE users SET cash = :new_cash WHERE id = :user_id", new_cash=(cash - cash_req), user_id=session["user_id"])
@@ -252,5 +253,64 @@ def register():
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    """Sell shares of stock."""
-    return apology("TODO")
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        
+        # check ticker is passed and quantity to sell
+        if not request.form.get("symbol"):
+            return apology("please select a symbol!")
+        elif not request.form.get("quantity"):
+            return apology("please enter the quantity to sell!")
+        symbol = request.form.get("symbol")
+        quantity = request.form.get("quantity", type=int)
+            
+        # get list of all users shares in user_history for ticker
+        # ordered by date asc
+        shares_owned = db.execute("SELECT id FROM user_history WHERE user_id = :uid AND symbl = :symbol AND is_sold = 0 ORDER BY timestamp ASC", uid=session["user_id"], symbol=symbol)
+        
+        # check sql success and the records are = or > to the quantity to sell
+        if len(shares_owned) < int(quantity):
+            return apology("you only hold {} share(s) for {} cannot sell {}".format(len(shares_owned), symbol, quantity))
+        
+        # get current value of share
+        data = lookup(symbol)
+        if not data:
+            return apology("Couldn't get info for {}".format(request.form.get("symbol")))
+        price = data["price"]
+        
+        # calculate value of shares
+        value = price * quantity
+        
+        listCounter = 0;
+        qtyCounter = quantity
+        # Iterate through sql list while quantity to sell is > 0
+        while True:
+            if qtyCounter > 0:
+                sql = db.execute("UPDATE user_history SET is_sold = 1, sell_timestamp = CURRENT_TIMESTAMP WHERE id = :id", id=shares_owned[listCounter]["id"])
+                if not sql:
+                    return apology("Something went wrong selling your shares :(")
+                listCounter += 1
+                qtyCounter -= 1
+            else:
+                break
+        
+        # add current value to user's shares in users
+        sql = db.execute("SELECT cash FROM users WHERE id = :uid", uid=session["user_id"])
+        if not sql:
+            return apology("Error retrieving your current balance!")
+        cash = sql[0]["cash"]
+        cash += value
+        sql = db.execute("UPDATE users SET cash = :cash WHERE id = :uid", cash=cash, uid=session["user_id"])
+        if not sql:
+            return apology("Something went wrong updating your balance!")
+            
+        # add success flash message and redirect to index
+        flash('Successfully sold {} shares of {} with a value of {}'.format(quantity, symbol, usd(value)))
+        return redirect(url_for("index"))
+    
+    elif request.method == "GET":
+        # get list of sellable shares
+        tickers = db.execute("SELECT DISTINCT symbl as ticker FROM user_history WHERE user_id = :uid", uid=session['user_id'])
+        
+        # return sell view
+        return render_template("sell.html", tickers=tickers)
