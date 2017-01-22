@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Account History
+{% endblock %}
+
+{% block main %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="width:20%;">Symbol</th>
+                <th style="width:20%;">Shares</th>
+                <th style="width:20%;">Price</th>
+                <th style="width:20%;">Sell/Buy</th>
+                <th style="width:20%;">Date</th>
+            </tr>
+        </thead>
+        {% for share in transactions %}
+        <tr>
+            <td>{{ share.symbol }}</td>
+            <td>{{ share.quantity or 0 }}</td>
+            <td>{{ "$ {:,.2f}".format(share.price or 0) }}</td>
+            
+            {% if share.transaction_type == "1" %}
+                <td>Buy</td>
+            {% elif share.transaction_type == "2" %}
+                <td>Sell</td>
+            {% endif %}
+            
+            <td>{{ share.timestamp }}</td>
+        </tr>
+        {% endfor %}
+        
+    </table>
+{% endblock %}

@@ -1,18 +1,20 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+    Account Overview
 {% endblock %}
 
 {% block main %}
     <table class="table table-striped">
-        <tr>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Shares</th>
-            <th>Price</th>
-            <th>Value</th>
-        </tr>
+        <thead>
+            <tr>
+                <th style="width:20%">Symbol</th>
+                <th style="width:20%">Name</th>
+                <th style="width:20%">Shares</th>
+                <th style="width:20%">Price</th>
+                <th style="width:20%">Value</th>
+            </tr>
+        </thead>
         {% for share in shares %}
         <tr>
             <td>{{ share.symbol }}</td>

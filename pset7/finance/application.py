@@ -132,8 +132,27 @@ def buy():
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions."""
-    return apology("TODO")
+    # get list of user's historic transactions
+    sql = db.execute("""
+        SELECT * FROM 
+            (
+    	            SELECT symbl as symbol, count(quantity) as quantity, max(price) as price, timestamp, '1' as transaction_type 
+    	            FROM user_history
+    	            WHERE user_id = :user_id
+    	            GROUP BY symbl, quantity, price, timestamp
+    	        UNION
+        	        SELECT symbl as symbol, count(quantity) as quantity, max(sell_price) as price, sell_timestamp as timestamp, '2' as transaction_type 
+        	        FROM user_history
+        	        WHERE user_id = :user_id AND is_sold = 1 
+        	        GROUP BY symbl, quantity, price, timestamp
+	        )
+        ORDER BY timestamp ASC;
+    """, user_id=session["user_id"])
+    if not sql:
+        return apology("Sorry - no transactions were found!")
+    
+    # return view to user with transactions
+    return render_template("history.html", transactions=sql)
 
 
 
@@ -286,7 +305,7 @@ def sell():
         # Iterate through sql list while quantity to sell is > 0
         while True:
             if qtyCounter > 0:
-                sql = db.execute("UPDATE user_history SET is_sold = 1, sell_timestamp = CURRENT_TIMESTAMP WHERE id = :id", id=shares_owned[listCounter]["id"])
+                sql = db.execute("UPDATE user_history SET is_sold = 1, sell_timestamp = CURRENT_TIMESTAMP, sell_price = :price WHERE id = :id", id=shares_owned[listCounter]["id"], price=price)
                 if not sql:
                     return apology("Something went wrong selling your shares :(")
                 listCounter += 1
