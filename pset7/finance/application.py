@@ -45,9 +45,10 @@ def index():
     # get user's portfolio from database
     portfolio = db.execute("SELECT user_id, symbl as symbol, sum(quantity) as qty FROM user_history WHERE type = :type AND user_id = :uid AND is_sold = 0 GROUP BY user_id, symbol", uid=user_id, type=1)
     
-    # check sql executed properly
+    # create empty portfolio if none found
     if not portfolio:
-        return apology("Error loading your portfolio!")
+        portfolio = []
+        flash("You currently have no shares in your portfolio!")
         
     # Iterate through each share in portfolio
     for share in portfolio:
@@ -69,8 +70,9 @@ def index():
         share["price"] = usd(share_dt["price"])
         
     # create cash object to summarise user's cash and append to end of portfolio
-    value = db.execute("SELECT cash FROM users WHERE id = :uid", uid=user_id)[0]["cash"]
-    cash = {"symbol" : "CASH", "name" : " ", "qty" : " ", "price" : " ", "value" : usd(value)}
+    value = db.execute("SELECT cash FROM users WHERE id = :uid", uid=user_id)
+    cash_v = value[0]["cash"]
+    cash = {"symbol" : "CASH", "name" : " ", "qty" : " ", "price" : " ", "value" : usd(cash_v)}
     portfolio.append(cash)
 
     # return html list of portfolio summary
@@ -333,3 +335,51 @@ def sell():
         
         # return sell view
         return render_template("sell.html", tickers=tickers)
+
+
+@app.route("/account/password", methods=["GET", "POST"])
+@login_required
+def password():
+    # if user reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        
+        # ensure old password was submitted
+        if not request.form.get("old_password"):
+            flash('Please enter your current password', 'error')
+            return redirect(url_for("password"))
+            
+        # ensure new passwords are submitted and match
+        if not request.form.get("password") or not request.form.get("password_confirm"):
+            flash('Please enter your new password and confirm', 'error')
+            return redirect(url_for("password"))
+        elif request.form.get("password") != request.form.get("password_confirm"):
+            flash("Your new password and confirmation don't match!", 'error')
+            return redirect(url_for("password"))
+            
+        # query database for username
+        rows = db.execute("SELECT * FROM users WHERE id = :uid", uid=session['user_id'])
+
+        # ensure username exists and password is correct
+        if len(rows) != 1 or not pwd_context.verify(request.form.get("old_password"), rows[0]["hash"]):
+            flash('Your current password is incorrect!', 'error')
+            return redirect(url_for("password"))
+        
+        # ensure new password doesn't match the old password
+        if pwd_context.verify(request.form.get("password"), rows[0]["hash"]):
+            flash("You have used that password before! Please choose a new unique password.", 'error')
+            return redirect(url_for("password"))
+            
+        # update password
+        hPass = pwd_context.encrypt(request.form.get("password"))
+        r = db.execute("UPDATE users SET hash = :hash WHERE id = :uid", uid=session['user_id'], hash=hPass)
+        if not r:
+            flash('Sorry - something went wrong updating your password', 'error')
+            return redirect(url_for("password"))
+        
+        # return success message and password change form
+        flash('Successfully updated your password')
+        return redirect(url_for("password"))
+        
+    elif request.method =="GET":
+        # return password change form
+        return render_template("password.html")
